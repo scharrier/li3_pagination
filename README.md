@@ -55,7 +55,7 @@ public function index() {
 }
 ```
 
-And finally, just give your paginable records set to the Pagination helper :
+And finally, just give your paginable records set to the Pagination helper in your view :
 ```php
 $this->pagination->paginate($records) ;
 ```
