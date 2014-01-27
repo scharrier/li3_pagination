@@ -10,7 +10,6 @@ Install
 -------
 
 The easiest way to install li3_pagination is to use composer, adding this lines in your composer.json file:
-
 ```json
 {
 	"require" : {
@@ -65,4 +64,4 @@ Yep. That's all.
 Help and support
 ----------------
 
-Fork it, play with it, commit if needed and pull request ! Ask your questions or tell me about problemes you have in the repo issues.
+Fork it, play with it, commit if needed and pull request ! Ask your questions or tell me more about problems you have in the repo issues.
