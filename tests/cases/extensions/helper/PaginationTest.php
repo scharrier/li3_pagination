@@ -1,7 +1,7 @@
 <?php
 namespace li3_pagination\tests\cases\extensions\helper;
 
-use li3_pagination\extensions\data\Set;
+use li3_pagination\extensions\data\DocumentSet as Set;
 use li3_pagination\tests\mocks\extensions\helper\MockPagination as Pagination;
 use lithium\net\http\Router;
 use lithium\action\Request;

@@ -4,22 +4,22 @@ namespace li3_pagination\extensions\data ;
 use lithium\data\collection\DocumentSet;
 
 /**
- * Set de données embarquant les méta de pagination. Evite d'avoir à transmettre
- * des trucs à la main. Un peu hacky sur les bords, mais ça va être bien pratique.
+ * Paginable documents set.
  */
-class Set implements \IteratorAggregate, \Countable {
+class DocumentSet implements \IteratorAggregate, \Countable {
 
 	/**
-	 * Meta données de pagination.
+	 * Pagination meta data.
 	 *
 	 * @var array
 	 */
 	protected $_meta = array() ;
 
 	/**
-	 * Constructeur.
-	 * @param DocumentSet $set  Set de données
-	 * @param array       $meta (optionnel) Méta données
+	 * Constructor.
+	 *
+	 * @param DocumentSet $set  Original ocuments set
+	 * @param array       $meta (optional) Meta data
 	 */
 	public function __construct(DocumentSet $documents = null, array $meta = null) {
 		if (isset($documents)) {
@@ -31,7 +31,7 @@ class Set implements \IteratorAggregate, \Countable {
 	}
 
 	/**
-	 * Permet d'accéder au vrai set.
+	 * Access to the real documents set
 	 *
 	 * @return \lithium\data\collection\DocumentSet Set de document
 	 */
@@ -44,10 +44,10 @@ class Set implements \IteratorAggregate, \Countable {
 	}
 
 	/**
-	 * Getter/setter de méta données.
+	 * Getter/setter : meta data
 	 *
-	 * @param  array $meta Setter : tableau de méta
-	 * @return array       Getter : tableau de méta
+	 * @param  array $meta Setter : meta array
+	 * @return array       Getter : meta array
 	 */
 	public function meta($meta = null) {
 		if (!isset($meta)) {
@@ -58,33 +58,33 @@ class Set implements \IteratorAggregate, \Countable {
 	}
 
 	/**
-	 * Accessor magique. Permet d'accéder aux méta donnée en direct.
+	 * Magical accessor.
 	 *
-	 * Exemple :
+	 * Example :
 	 * {{{
-	 * $set->limit ; // Accède à $this->_meta['limit']
+	 * $set->limit ; // Access to $this->_meta['limit']
 	 * }}}
 	 *
-	 * @param  string $key Clé à laquelle on veut accéder
-	 * @return mixed       Valeur
+	 * @param  string $key Key we want to access to
+	 * @return mixed       Value
 	 */
 	public function __get($key) {
 		return isset($this->_meta[$key]) ? $this->_meta[$key] : null ;
 	}
 
 	/**
-	 * Implémentation d'IteratorAggregate. Retourne le vrai itérator.
+	 * Implemets IteratorAggregate.
 	 *
-	 * @return Iterator Le set de documents
+	 * @return Iterator Documents set
 	 */
 	public function getIterator() {
 		return $this->_set ;
 	}
 
 	/**
-	 * Implémentation de Countable.
+	 * Implements Countable.
 	 *
-	 * @return int Nombre de documents dans le set
+	 * @return int Documents count
 	 */
 	public function count() {
 		return $this->_set->count() ;

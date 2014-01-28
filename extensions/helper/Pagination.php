@@ -3,7 +3,7 @@ namespace li3_pagination\extensions\helper;
 
 use lithium\net\http\Router;
 use lithium\util\Set;
-use li3_pagination\extensions\data\Set as DocumentSet;
+use li3_pagination\extensions\data\DocumentSet;
 
 /**
  * Generates pagination links for a record set.
