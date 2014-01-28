@@ -17,9 +17,10 @@ class Pagination extends \lithium\template\Helper {
 		'outerWindow'   => 1,
 		'linkSeparator' => ' ',
 		'firstLabel'    => '<< First',
-		'previousLabel' => '< Previous',
+		'prevLabel' => '< Previous',
 		'nextLabel'     => 'Next >',
-		'lastLabel'     => 'Last >>'
+		'lastLabel'     => 'Last >>',
+		'activeClass'	=> 'active'
 	] ;
 
 	/**
@@ -56,9 +57,10 @@ class Pagination extends \lithium\template\Helper {
 	 *     They allow for the easy alteration of text used on prev/next links.
 	 *     Valid options are:
 	 *        - `'firstLabel'`: Overrides markup used for "<< First" anchor tag.
-	 *        - `'previousLabel'`: Overrides markup used for "< Prev" anchor tag.
+	 *        - `'prevLabel'`: Overrides markup used for "< Prev" anchor tag.
 	 *        - `'nextLabel'`: Overrides markup used for "Next >" anchor tag.
 	 *        - `'lastLabel'`: Overrides markup used for "Last >>" anchor tag.
+	 *        - `'activeClass'`: Css class added to the active item
 	 * @return object An instance of the Pagination class being constructed.
 	 */
 	public function __construct(array $config = []) {
@@ -96,7 +98,8 @@ class Pagination extends \lithium\template\Helper {
 	}
 
 	/**
-	 * Initialize the default configuration (or return it if no $defaults array)
+	 * Initializes the default configuration (or return it if no $defaults array). Can be
+	 * called statically from your bootstrap, for example.
 	 *
 	 * @param  array $defaults  (optionnal) Default configuration
 	 * @return array                        Default configuration
@@ -110,14 +113,97 @@ class Pagination extends \lithium\template\Helper {
 	}
 
 	/**
-	 * Updates the config for the current instance
+	 * Updates or get the config for the current instance
 	 *
 	 * @param  array $config New config
 	 */
-	public function config(array $config = []) {
+	public function config(array $config = null) {
+		if (!isset($config)) {
+			return $this->_config ;
+		}
+
 		$this->_config = $config + $this->_config ;
 	}
 
+	/**
+	 * Link to the first page.
+	 *
+	 * @param  array $options Options
+	 * @return string         Html markup
+	 */
+	public function first(array $options = []) {
+		list($scope, $options, $documents) = $this->_split($options);
+
+		if ($documents->page > 1) {
+			$url = $this->_url(['page' => 1]);
+			$content = $this->_context->html->link($this->_config['firstLabel'], $url);
+			return $this->_render(__METHOD__, 'links-wrap', compact('content', 'options'), $scope);
+		}
+
+		return '' ;
+	}
+
+	/**
+	 * Link to the last page.
+	 *
+	 * @param  array $options Options
+	 * @return string         Html markup
+	 */
+	public function last(array $options = []) {
+		list($scope, $options, $documents) = $this->_split($options);
+		$end = ceil(($documents->total / $documents->limit));
+
+		if ($documents->page < $end) {
+			$url = $this->_url(['page' => $end]);
+			$content = $this->_context->html->link($this->_config['lastLabel'], $url);
+			return $this->_render(__METHOD__, 'links-wrap', compact('content', 'options'), $scope);
+		}
+
+		return '' ;
+	}
+
+	/**
+	 * Link to the next page.
+	 *
+	 * @param  array $options Options
+	 * @return string         Html markup
+	 */
+	public function next(array $options = []) {
+		list($scope, $options, $documents) = $this->_split($options);
+
+		if ($documents->total > ($documents->limit * $documents->page)) {
+			$url = $this->_url(['page' => $documents->page + 1]);
+			$content = $this->_context->html->link($this->_config['nextLabel'], $url);
+			return $this->_render(__METHOD__, 'links-wrap', compact('content', 'options'), $scope);
+		}
+
+		return '' ;
+	}
+
+	/**
+	 * Link to the previous page.
+	 *
+	 * @param  array $options Options
+	 * @return string         Html markup
+	 */
+	public function prev(array $options = []) {
+		list($scope, $options, $documents) = $this->_split($options);
+
+		if ($documents->page > 1) {
+			$url = $this->_url(['page' => $documents->page - 1]);
+			$content = $this->_context->html->link($this->_config['prevLabel'], $url);
+			return $this->_render(__METHOD__, 'links-wrap', compact('content', 'options'), $scope);
+		}
+
+		return '' ;
+	}
+
+	/**
+	 * Returns the correct documents set (local var if defined, class var otherwise)
+	 *
+	 * @param  \li3_pagination\extensions\data\Set $documents Documents set
+	 * @return \li3_pagination\extensions\data\Set $documents Documents set
+	 */
 	protected function _documents(DocumentSet $documents = null) {
 		if (!isset($documents)) {
 			if (isset($this->_documents)) {
@@ -130,116 +216,49 @@ class Pagination extends \lithium\template\Helper {
 	}
 
 	/**
-	 * Creates the first page link
+	 * Split the options and returns an array with this 3 values :
+	 * - the scope options
+	 * - the link options (not defined in defaults)
+	 * - the documents set
 	 *
-	 * @param array $options
-	 * @return string Markup of the "<< First" page link.
+	 * @param  array  $options Options
+	 * @return array           Special array with always 3 values
 	 */
-	public function first(array $options = []) {
-		$request = $this->_request ;
-		$defaults = ['escape' => true, 'documents' => null];
-		list($scope, $options) = $this->_options($defaults, $options);
-		$documents = $this->_documents($documents) ;
+	protected function _split(array $options) {
+		$options += static::$_defaults ;
 
-		$content = '';
-
-		if ($documents->page > 1) {
-			$params  = $request ? $request->params : [];
-			$params += Set::merge($this->_query(), ['?' => ['page' => 1]]);
-
-			$url = Router::match($params, $request, ['absolute' => true]);
-
-			$content = $this->_context->html->link($this->_config['firstLabel'], $url);
-			return $this->_render(__METHOD__, 'links-wrap', compact('content', 'options'), $scope);
+		if (isset($options['documents'])) {
+			$documents = $this->_documents($options['documents']) ;
+			unset($options['documents']) ;
+		} else {
+			$documents = $this->_documents() ;
 		}
 
-		$options['class'] = 'unavailable';
-		return $this->_render(__METHOD__, 'links-wrap', compact('content', 'options'), $scope);
+		$return = [
+			array_intersect_key($options, static::$_defaults),
+			array_diff_key($options, static::$_defaults),
+			$documents
+		] ;
+
+
+		return $return ;
 	}
 
 	/**
-	 * Creates the previous page link
+	 * Generates the url
 	 *
-	 * @param array $options
-	 * @return string Markup of the "< Prev" page link.
+	 * @param  array $params Query params to force
+	 * @return string        Full url
 	 */
-	public function prev(DocumentSet $documents, array $options = []) {
-		$request = $this->_request ;
-		$defaults = ['escape' => true, 'documents' => null];
-		list($scope, $options) = $this->_options($defaults, $options);
-		$documents = $this->_documents($documents) ;
-
-		$content = '';
-
-		if ($documents->page > 1) {
-			$params  = $request ? $request->params : [];
-			$params += Set::merge($this->_query(), ['?' => ['page' => ($documents->page - 1)]]);
-
-			$url = Router::match($params, $request, ['absolute' => true]);
-
-			$content = $this->_context->html->link($this->_config['previousLabel'], $url);
-			return $this->_render(__METHOD__, 'links-wrap', compact('content', 'options'), $scope);
+	protected function _url(array $params = []) {
+		$current = !empty($this->_request->params) ? $this->_request->params : [];
+		$query = !empty($this->_request->query) ? $this->_request->query : [];
+		if (!empty($query['url'])) {
+			unset($query['url']);
 		}
+		$query = $params + $query ;
 
-		$options['class'] = 'unavailable';
-		return $this->_render(__METHOD__, 'links-wrap', compact('content', 'options'), $scope);
-	}
-
-	/**
-	 * Creates the next page link
-	 *
-	 * @param array $options
-	 * @return string Markup of the "Next >" page link.
-	 */
-	public function next(DocumentSet $documents, array $options = []) {
-		$request = $this->_request ;
-		$defaults = ['escape' => true, 'documents' => null];
-		list($scope, $options) = $this->_options($defaults, $options);
-		$documents = $this->_documents($documents) ;
-
-		$content = '';
-
-		if ($documents->total > ($documents->limit * $documents->page)) {
-			$params  = $request ? $request->params : [];
-			$params += Set::merge($this->_query(), ['?' => ['page' => ($documents->page + 1)]]);
-
-			$url = Router::match($params, $request, ['absolute' => true]);
-
-			$content = $this->_context->html->link($this->_config['nextLabel'], $url);
-			return $this->_render(__METHOD__, 'links-wrap', compact('content', 'options'), $scope);
-		}
-		$options['class'] = 'unavailable';
-		return $this->_render(__METHOD__, 'links-wrap', compact('content', 'options'), $scope);
-	}
-
-	/**
-	 * Creates the last page link
-	 *
-	 * @param array $options
-	 * @return string Markup of the "Last >>" page link.
-	 */
-	public function last(DocumentSet $documents, array $options = []) {
-		$request = $this->_request ;
-		$defaults = ['escape' => true, 'documents' => null];
-		list($scope, $options) = $this->_options($defaults, $options);
-		$documents = $this->_documents($documents) ;
-
-		$content = '';
-
-		$end = ceil(($documents->total / $documents->limit));
-
-		if ($end > $documents->page) {
-			$params  = $request ? $request->params : [];
-			$params += Set::merge($this->_query(), ['?' => ['page' => $end]]);
-
-			$url = Router::match($params, $request, ['absolute' => true]);
-
-			$content = $this->_context->html->link($this->_config['lastLabel'], $url);
-			return $this->_render(__METHOD__, 'links-wrap', compact('content', 'options'), $scope);
-		}
-
-		$options['class'] = 'unavailable';
-		return $this->_render(__METHOD__, 'links-wrap', compact('content', 'options'), $scope);
+		return Router::match(['?' => $query] + $current, $this->_request, ['absolute' => true]);
 	}
 
 	/**

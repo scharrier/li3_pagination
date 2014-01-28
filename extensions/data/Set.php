@@ -21,8 +21,13 @@ class Set implements \IteratorAggregate, \Countable {
 	 * @param DocumentSet $set  Set de données
 	 * @param array       $meta (optionnel) Méta données
 	 */
-	public function __construct(DocumentSet $set, array $meta = []) {
-		$this->_set = $set ;
+	public function __construct(DocumentSet $documents = null, array $meta = null) {
+		if (isset($documents)) {
+			$this->_documents = $documents ;
+		}
+		if (isset($meta)) {
+			$this->_meta = $meta ;
+		}
 	}
 
 	/**
@@ -30,8 +35,12 @@ class Set implements \IteratorAggregate, \Countable {
 	 *
 	 * @return \lithium\data\collection\DocumentSet Set de document
 	 */
-	public function documents() {
-		return $this->_set ;
+	public function documents(DocumentSet $documents = null) {
+		if (!isset($documents)) {
+			return $this->_documents ;
+		}
+
+		$this->_documents = $documents ;
 	}
 
 	/**
