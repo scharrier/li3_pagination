@@ -2,7 +2,7 @@
 namespace li3_pagination\tests\cases\extensions\helper;
 
 use li3_pagination\extensions\data\Set;
-use li3_pagination\extensions\helper\Pagination;
+use li3_pagination\tests\mocks\extensions\helper\MockPagination as Pagination;
 use lithium\net\http\Router;
 use lithium\action\Request;
 use lithium\tests\mocks\template\MockRenderer;
@@ -77,5 +77,34 @@ class PaginationTest extends \lithium\test\Unit {
 		$set->meta(['page' => 2]) ;
 		$res = $pagination->prev(['documents' => $set]) ;
 		$this->assertTrue((bool) preg_match('/\?page=1/', $res)) ;
+	}
+
+	public function testNumbers() {
+		$pagination = new Pagination(['context' => $this->context]) ;
+		$set = new Set(null, ['page' => 1, 'total' => 25, 'limit' => 5]) ;
+
+		$res = $pagination->numbers(['documents' => $set]);
+		$this->assertEqual([1,2,3,4,5], $res) ;
+
+		$set->meta(['total' => 100]);
+		$res = $pagination->numbers(['documents' => $set]);
+		$this->assertEqual([1,2,3,4,5,6,7,8,9,10], $res) ;
+
+		$set->meta(['page' => 20]);
+		$res = $pagination->numbers(['documents' => $set]);
+		$this->assertEqual([11,12,13,14,15,16,17,18,19,20], $res) ;
+
+		$set->meta(['total' => 10]);
+		$res = $pagination->numbers(['documents' => $set]);
+		$this->assertEqual([1,2], $res) ;
+	}
+
+	public function testPages() {
+		$pagination = new Pagination(['context' => $this->context]) ;
+		$set = new Set(null, ['page' => 1, 'total' => 25, 'limit' => 5]) ;
+		$res = $pagination->pages(['documents' => $set]);
+
+		$this->assertTrue((bool) preg_match('/class="active"><a href="[^"]+\/post/', $res)) ;
+		$this->assertTrue((bool) preg_match('/\?page=5/', $res)) ;
 	}
 }

@@ -13,14 +13,13 @@ class Pagination extends \lithium\template\Helper {
 	 * @var array
 	 */
 	static $_defaults = [
-		'innerWindow'   => 4,
-		'outerWindow'   => 1,
 		'linkSeparator' => ' ',
 		'firstLabel'    => '<< First',
 		'prevLabel' => '< Previous',
 		'nextLabel'     => 'Next >',
 		'lastLabel'     => 'Last >>',
-		'activeClass'	=> 'active'
+		'activeClass'	=> 'active',
+		'pages' => 10
 	] ;
 
 	/**
@@ -199,6 +198,77 @@ class Pagination extends \lithium\template\Helper {
 	}
 
 	/**
+	 * Pages links.
+	 *
+	 * @param  array $options Options
+	 * @return string         Html markup
+	 */
+	public function pages(array $options = []) {
+		list($scope, $options, $documents) = $this->_split($options);
+
+		$numbers = $this->_numbers($documents, $scope);
+		if ($numbers) {
+			$content = [] ;
+			foreach($numbers as $page) {
+				$content[] = $this->_pageNumber($documents, $page, $scope, $options) ;
+			}
+			$content = join($this->_config['linkSeparator'], $content);
+
+			return $this->_render(__METHOD__, 'wrap', compact('content'), $scope);
+		}
+
+		return '';
+	}
+
+	/**
+	 * Calculates an array with all the pages numbers for the current documents set.
+	 *
+	 * @param  DocumentSet $documents The documents
+	 * @param  array       $options   Options
+	 * @return array                  Range of pages to display
+	 */
+	protected function _numbers(DocumentSet $documents, array $options) {
+		$pages = ceil($documents->total / $documents->limit);
+
+		if ($pages > 1) {
+			$page = $documents->page ;
+			$numbers = $options['pages'] ;
+
+			if ($page + $numbers < $pages) {
+				$first = max(1, floor($page - ($numbers / 2))) ;
+				$last = min($first + $numbers - 1 , $pages) ;
+			} else {
+				$last = $pages ;
+				$first = max(1, $last - $numbers + 1) ;
+			}
+
+			return range($first, $last) ;
+		}
+		return null ;
+	}
+
+	/**
+	 * Display a page number.
+	 *
+	 * @param  DocumentSet $documents Doccuments set
+	 * @param  int         $page      Current page
+	 * @param  array       $scope     Scope options
+	 * @param  array       $options   Link options
+	 * @return string                 Html markup
+	 */
+	protected function _pageNumber(DocumentSet $documents, $page, array $scope, array $options) {
+		if ($page == $documents->page) {
+			$options['class'] = !empty($options['class']) ? $options['class'] . ' ' . $scope['activeClass'] : $scope['activeClass'];
+		}
+
+		$url = $page > 1 ? ['page' => $page] : [];
+		$url = $this->_url($url);
+		$content = $this->_context->html->link($page, $url);
+
+		return $this->_render(__METHOD__, 'links-wrap', compact('content', 'options'), ['escape' => false]);
+	}
+
+	/**
 	 * Returns the correct documents set (local var if defined, class var otherwise)
 	 *
 	 * @param  \li3_pagination\extensions\data\Set $documents Documents set
@@ -240,7 +310,6 @@ class Pagination extends \lithium\template\Helper {
 			$documents
 		] ;
 
-
 		return $return ;
 	}
 
@@ -258,120 +327,9 @@ class Pagination extends \lithium\template\Helper {
 		}
 		$query = $params + $query ;
 
-		return Router::match(['?' => $query] + $current, $this->_request, ['absolute' => true]);
-	}
-
-	/**
-	 * Creates the individual numeric page links, with the current link in the middle.
-	 *
-	 * @param array $options
-	 * @return string Markup of the numeric page links.
-	 */
-	public function numbers(array $options = []) {
-		$options += ['documents' => null] ;
-		$documents = $this->_documents($options['documents']) ;
-		$inner_window = (int) $this->_config['innerWindow'];
-		$outer_window = (int) $this->_config['outerWindow'];
-		$window_from = $documents->page - $inner_window;
-		$window_to = $documents->page + $inner_window;
-		$total_pages = (int) ceil($documents->total / $documents->limit);
-
-		// adjust lower or upper limit if other is out of bounds
-		if ($window_to > $total_pages) {
-			$window_from -= $window_to - $total_pages;
-			$window_to = $total_pages;
-		}
-		if ($window_from < 1) {
-			$window_to += 1 - $window_from;
-			$window_from = 1;
-			$window_to = ($window_to > $total_pages) ? $total_pages : $window_to;
-		}
-
-		// these are always visible
-		$middle = range($window_from, $window_to);
-
-		// left window
-		if ($outer_window + 3 < $middle[0]) {
-			$left = range(1, $outer_window + 1);
-			array_push($left, '...');
-		} else {
-			$left = range(1, $middle[0]);
-			array_pop($left);
-		}
-
-		// right window
-		if ($total_pages - $outer_window - 2 > end($middle)) {
-			$right = range($total_pages - $outer_window, $total_pages);
-			array_unshift($right, '...');
-		} else {
-			$right = end($middle) + 1 <= $total_pages ? range(end($middle) + 1, $total_pages) : [];
-		}
-
-		return array_merge_recursive($left, $middle, $right);
-	}
-
-	/**
-	 * Creates a full pagination control, based on configuration options defined during construction.
-	 *
-	 * @param array $options
-	 * @return string Markup of a full pagination control, based on config
-	 *     eg: "< Prev | 1 | <strong>2</strong> | 3 | Next >".
-	 */
-	public function paginate(array $options = []) {
-		$options += ['documents' => null] ;
-		$documents = $this->_documents($options['documents']) ;
-		$total_pages = ceil(($documents->total / $documents->limit));
-
-		// early exit if there is nothing to render
-		if (!($total_pages > 1)) {
-			return null;
-		}
-
-		$request = $this->_request ;
-
-		$defaults = ['escape' => true];
-		list($scope, $options) = $this->_options($defaults, $options);
-
-		$content = [] ;
-		$numbers = $this->numbers(['documents' => $documents]) ;
-		foreach($numbers as $page) {
-			$content[] = $this->_page_number($documents, $page) ;
-		}
-		$content = join($this->_config['linkSeparator'], $content);
-
-		return $this->_render(__METHOD__, 'wrap', compact('content'), $scope);
-	}
-
-	protected function _query() {
-		$params = $this->_request->query;
-
-		if (count($params) > 1) {
-			unset($params['url']);
-			return ['?' => $params];
-		}
-		return [];
-	}
-
-	protected function _page_number(DocumentSet $documents, $page) {
-		$request = $this->_request ;
-
-		$options = [];
-
-		if ($page == $documents->page) {
-			$options['class'] = 'active';
-		}
-
-		if (is_int($page)) {
-			$params  = $request ? $request->params : [];
-			$params += Set::merge($this->_query(), ['?' => ['page' => $page]]);
-
-			$url = Router::match($params, $request, ['absolute' => true]);
-			$content = $this->_context->html->link($page, $url);
-		} else {
-			$content = $this->_context->html->link($page, '#');
-			$options['class'] = 'unavailable';
-		}
-
-		return $this->_render(__METHOD__, 'links-wrap', compact('content', 'options'), ['escape' => false]);
+		return Router::match(
+			!empty($query) ? ['?' => $query] + $current : $current,
+			$this->_request,
+			['absolute' => true]);
 	}
 }
