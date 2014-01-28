@@ -1,7 +1,7 @@
 <?php
 namespace li3_pagination\tests\cases\extensions\helper;
 
-use li3_pagination\extensions\data\DocumentSet as Set;
+use li3_pagination\extensions\data\PaginableSet as Set;
 use li3_pagination\tests\mocks\extensions\helper\MockPagination as Pagination;
 use lithium\net\http\Router;
 use lithium\action\Request;
@@ -104,7 +104,7 @@ class PaginationTest extends \lithium\test\Unit {
 		$set = new Set(null, ['page' => 1, 'total' => 25, 'limit' => 5]) ;
 		$res = $pagination->pages(['documents' => $set]);
 
-		$this->assertTrue((bool) preg_match('/class="active"><a href="[^"]+\/post/', $res)) ;
+		$this->assertTrue((bool) preg_match('/class="active"><a href="[^"]+\/post\?page=1/', $res)) ;
 		$this->assertTrue((bool) preg_match('/\?page=5/', $res)) ;
 	}
 
