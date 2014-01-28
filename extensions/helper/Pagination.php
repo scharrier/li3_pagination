@@ -16,10 +16,10 @@ use li3_pagination\extensions\data\PaginableSet;
  *
  * Available options :
  *   - `'linkSeparator'`: String beetween 2 links
- *   - `'firstLabel'`: Overrides markup used for "<< First" anchor tag.
- *   - `'prevLabel'`: Overrides markup used for "< Prev" anchor tag.
- *   - `'nextLabel'`: Overrides markup used for "Next >" anchor tag.
- *   - `'lastLabel'`: Overrides markup used for "Last >>" anchor tag.
+ *   - `'firstLabel'`: Overrides markup used for "<<" anchor tag.
+ *   - `'prevLabel'`: Overrides markup used for "<" anchor tag.
+ *   - `'nextLabel'`: Overrides markup used for ">" anchor tag.
+ *   - `'lastLabel'`: Overrides markup used for ">>" anchor tag.
  *   - `'activeClass'`: Css class added to the active item
  *   - `'pages'`: Pages you want to display
  *   - `'displayPrevNext'`: A boolean to tell the helper if you want the prev/next links calling the paginate() method
@@ -41,10 +41,10 @@ class Pagination extends \lithium\template\Helper {
 	 */
 	static $_defaults = [
 		'linkSeparator' => ' ',
-		'firstLabel'    => '<< First',
-		'prevLabel' => '< Previous',
-		'nextLabel'     => 'Next >',
-		'lastLabel'     => 'Last >>',
+		'firstLabel'    => '<<',
+		'prevLabel' => '<',
+		'nextLabel'     => '>',
+		'lastLabel'     => '>>',
 		'activeClass'	=> 'active',
 		'pages' => 10,
 		'displayPrevNext' => true,
