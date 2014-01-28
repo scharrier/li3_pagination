@@ -3,7 +3,7 @@ namespace li3_pagination\extensions\helper;
 
 use lithium\net\http\Router;
 use lithium\util\Set;
-use li3_pagination\extensions\data\DocumentSet;
+use li3_pagination\extensions\data\PaginableSet;
 
 /**
  * Generates pagination links for a record set.
@@ -108,7 +108,7 @@ class Pagination extends \lithium\template\Helper {
 		if (!empty($this->_context->_config['data'])) {
 			$document = null;
 			foreach($this->_context->_config['data'] as $key => $value) {
-				if ($value instanceof DocumentSet) {
+				if ($value instanceof PaginableSet) {
 					// More than one : we cannot do this automatically
 					if (isset($document)) {
 						unset($document);
@@ -276,11 +276,11 @@ class Pagination extends \lithium\template\Helper {
 	/**
 	 * Calculates an array with all the pages numbers for the current documents set.
 	 *
-	 * @param  DocumentSet $documents The documents
+	 * @param  PaginableSet $documents The documents
 	 * @param  array       $options   Options
 	 * @return array                  Range of pages to display
 	 */
-	protected function _numbers(DocumentSet $documents, array $options) {
+	protected function _numbers(PaginableSet $documents, array $options) {
 		$pages = ceil($documents->total / $documents->limit);
 
 		if ($pages > 1) {
@@ -303,13 +303,13 @@ class Pagination extends \lithium\template\Helper {
 	/**
 	 * Display a page number.
 	 *
-	 * @param  DocumentSet $documents Doccuments set
+	 * @param  PaginableSet $documents Doccuments set
 	 * @param  int         $page      Current page
 	 * @param  array       $scope     Scope options
 	 * @param  array       $options   Link options
 	 * @return string                 Html markup
 	 */
-	protected function _pageNumber(DocumentSet $documents, $page, array $scope, array $options) {
+	protected function _pageNumber(PaginableSet $documents, $page, array $scope, array $options) {
 		if ($page == $documents->page) {
 			$options['class'] = !empty($options['class']) ? $options['class'] . ' ' . $scope['activeClass'] : $scope['activeClass'];
 		}
@@ -327,12 +327,12 @@ class Pagination extends \lithium\template\Helper {
 	 * @param  \li3_pagination\extensions\data\Set $documents Documents set
 	 * @return \li3_pagination\extensions\data\Set $documents Documents set
 	 */
-	protected function _documents(DocumentSet $documents = null) {
+	protected function _documents(PaginableSet $documents = null) {
 		if (!isset($documents)) {
 			if (isset($this->_documents)) {
 				return $this->_documents ;
 			}
-			throw new \RuntimeException('No active DocumentSet : cannot generate the pagination') ;
+			throw new \RuntimeException('No active PaginableSet : cannot generate the pagination') ;
 		}
 
 		return $documents ;

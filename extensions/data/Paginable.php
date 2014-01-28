@@ -2,7 +2,7 @@
 namespace li3_pagination\extensions\data ;
 
 use lithium\action\Request;
-use li3_pagination\extensions\data\Set;
+use li3_pagination\extensions\data\PaginableSet;
 
 /**
  * Prend en charge la pagination depuis une requête HTTP.
@@ -27,7 +27,7 @@ trait Paginable {
 			'page' => $page
 		] + $query) ;
 
-		$return = new Set($records) ;
+		$return = new PaginableSet($records) ;
 		$return->meta(['page' => $page, 'total' => $total, 'limit' => $query['limit']]) ;
 
 		return $return ;

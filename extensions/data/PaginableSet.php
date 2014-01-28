@@ -6,7 +6,7 @@ use lithium\data\collection\DocumentSet;
 /**
  * Paginable documents set.
  */
-class DocumentSet implements \IteratorAggregate, \Countable {
+class PaginableSet implements \IteratorAggregate, \Countable {
 
 	/**
 	 * Pagination meta data.
@@ -78,7 +78,7 @@ class DocumentSet implements \IteratorAggregate, \Countable {
 	 * @return Iterator Documents set
 	 */
 	public function getIterator() {
-		return $this->_set ;
+		return $this->_documents ;
 	}
 
 	/**
@@ -87,6 +87,6 @@ class DocumentSet implements \IteratorAggregate, \Countable {
 	 * @return int Documents count
 	 */
 	public function count() {
-		return $this->_set->count() ;
+		return $this->_documents->count() ;
 	}
 }
