@@ -314,8 +314,7 @@ class Pagination extends \lithium\template\Helper {
 			$options['class'] = !empty($options['class']) ? $options['class'] . ' ' . $scope['activeClass'] : $scope['activeClass'];
 		}
 
-		$url = $page > 1 ? ['page' => $page] : [];
-		$url = $this->_url($url);
+		$url = $this->_url(['page' => $page]);
 		$content = $this->_context->html->link($page, $url);
 
 		return $this->_render(__METHOD__, 'links-wrap', compact('content', 'options'), ['escape' => false]);
