@@ -5,6 +5,33 @@ use lithium\net\http\Router;
 use lithium\util\Set;
 use li3_pagination\extensions\data\Set as DocumentSet;
 
+/**
+ * Generates pagination links for a record set.
+ *
+ * The easiest way to use it is to call the paginate() method, with options for displaying
+ * what you want :
+ * ```php
+ * $this->pagination->paginate(['displayPrevNext' => false]) ; // Only pages
+ * ```
+ *
+ * Available options :
+ *   - `'linkSeparator'`: String beetween 2 links
+ *   - `'firstLabel'`: Overrides markup used for "<< First" anchor tag.
+ *   - `'prevLabel'`: Overrides markup used for "< Prev" anchor tag.
+ *   - `'nextLabel'`: Overrides markup used for "Next >" anchor tag.
+ *   - `'lastLabel'`: Overrides markup used for "Last >>" anchor tag.
+ *   - `'activeClass'`: Css class added to the active item
+ *   - `'pages'`: Pages you want to display
+ *   - `'displayPrevNext'`: A boolean to tell the helper if you want the prev/next links calling the paginate() method
+ *   - `'displayFirstLast'`: A boolean to tell the helper if you want the first/last links calling the paginate() method
+ *   - `'displayPages'`: A boolean to tell the helper if you want pages numbers
+ *
+ * You can configure globally the helper by calling the static method defaults() from your boostrap or
+ * anywhere inside your application :
+ * ```php
+ * Pagination::defaults(['displayFirstLast' => true]) ; // Display the first/last link by default for each paginate() call
+ * ``
+ */
 class Pagination extends \lithium\template\Helper {
 
 	/**
@@ -19,22 +46,25 @@ class Pagination extends \lithium\template\Helper {
 		'nextLabel'     => 'Next >',
 		'lastLabel'     => 'Last >>',
 		'activeClass'	=> 'active',
-		'pages' => 10
-	] ;
+		'pages' => 10,
+		'displayPrevNext' => true,
+		'displayFirstLast' => false,
+		'displayPages' => true
+	];
 
 	/**
 	 * Current request.
 	 *
 	 * @var \lithium\action\Request
 	 */
-	protected $_request ;
+	protected $_request;
 
 	/**
 	 * Current documents set
 	 *
 	 * @var \li3_pagination\extensions\data\Set
 	 */
-	protected $_documents ;
+	protected $_documents;
 
 	/**
 	 * Protected array of string templates used by this helper.
@@ -55,11 +85,7 @@ class Pagination extends \lithium\template\Helper {
 	 * @param array $config An array of options that can be configured during construction.
 	 *     They allow for the easy alteration of text used on prev/next links.
 	 *     Valid options are:
-	 *        - `'firstLabel'`: Overrides markup used for "<< First" anchor tag.
-	 *        - `'prevLabel'`: Overrides markup used for "< Prev" anchor tag.
-	 *        - `'nextLabel'`: Overrides markup used for "Next >" anchor tag.
-	 *        - `'lastLabel'`: Overrides markup used for "Last >>" anchor tag.
-	 *        - `'activeClass'`: Css class added to the active item
+	 *
 	 * @return object An instance of the Pagination class being constructed.
 	 */
 	public function __construct(array $config = []) {
@@ -76,7 +102,7 @@ class Pagination extends \lithium\template\Helper {
 	 */
 	protected function _init() {
 		parent::_init();
-		$this->_request = $this->_context->_config['request'] ;
+		$this->_request = $this->_context->_config['request'];
 
 		// If there is only one compatible records set in the view, we catch it
 		if (!empty($this->_context->_config['data'])) {
@@ -92,7 +118,7 @@ class Pagination extends \lithium\template\Helper {
 					}
 				}
 			}
-			$this->_documents = $document ;
+			$this->_documents = $document;
 		}
 	}
 
@@ -105,10 +131,10 @@ class Pagination extends \lithium\template\Helper {
 	 */
 	public static function defaults(array $defaults = null) {
 		if (!isset($defaults)) {
-			return static::$_defaults ;
+			return static::$_defaults;
 		}
 
-		static::$_defaults = $defaults + static::$_defaults ;
+		static::$_defaults = $defaults + static::$_defaults;
 	}
 
 	/**
@@ -118,10 +144,39 @@ class Pagination extends \lithium\template\Helper {
 	 */
 	public function config(array $config = null) {
 		if (!isset($config)) {
-			return $this->_config ;
+			return $this->_config;
 		}
 
-		$this->_config = $config + $this->_config ;
+		$this->_config = $config + $this->_config;
+	}
+
+	/**
+	 * Generates the full pagination block.
+	 *
+	 * @param  array $options  Options
+	 * @return string          Html markup
+	 */
+	public function paginate(array $options = []) {
+		list($scope, $unused, $documents) = $this->_split($options);
+
+		$start = [];
+		$end = [];
+
+		if ($scope['displayFirstLast']) {
+			$start[] = $this->first($options);
+			$end[] = $this->last($options);
+		}
+		if ($scope['displayPrevNext']) {
+			$start[] = $this->prev($options);
+			array_unshift($end, $this->next($options)) ;
+		}
+		if ($scope['displayPages']) {
+			$start[] = $this->pages($options) ;
+		}
+
+		$content = implode($scope['linkSeparator'], array_merge($start, $end));
+
+		return $this->_render(__METHOD__, 'wrap', compact('content'), $scope);
 	}
 
 	/**
@@ -212,9 +267,7 @@ class Pagination extends \lithium\template\Helper {
 			foreach($numbers as $page) {
 				$content[] = $this->_pageNumber($documents, $page, $scope, $options) ;
 			}
-			$content = join($this->_config['linkSeparator'], $content);
-
-			return $this->_render(__METHOD__, 'wrap', compact('content'), $scope);
+			return join($this->_config['linkSeparator'], $content);
 		}
 
 		return '';

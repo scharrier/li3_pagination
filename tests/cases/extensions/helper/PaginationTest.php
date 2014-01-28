@@ -107,4 +107,20 @@ class PaginationTest extends \lithium\test\Unit {
 		$this->assertTrue((bool) preg_match('/class="active"><a href="[^"]+\/post/', $res)) ;
 		$this->assertTrue((bool) preg_match('/\?page=5/', $res)) ;
 	}
+
+	public function testPaginate() {
+		$pagination = new Pagination(['context' => $this->context]) ;
+		$set = new Set(null, ['page' => 2, 'total' => 25, 'limit' => 5]) ;
+
+		$res = $pagination->paginate(['documents' => $set, 'displayPrevNext' => false, 'displayPages' => false]);
+		$this->assertFalse((bool) preg_match('/\<a/', $res)) ;
+
+		$res = $pagination->paginate(['documents' => $set, 'displayPrevNext' => true]);
+		$this->assertTrue((bool) preg_match('/Previous/', $res)) ;
+		$this->assertTrue((bool) preg_match('/Next/', $res)) ;
+
+		$res = $pagination->paginate(['documents' => $set, 'displayFirstLast' => true]);
+		$this->assertTrue((bool) preg_match('/First/', $res)) ;
+		$this->assertTrue((bool) preg_match('/Last/', $res)) ;
+	}
 }
