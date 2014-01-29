@@ -5,45 +5,44 @@ use lithium\action\Request;
 use li3_pagination\extensions\data\PaginableSet;
 
 /**
- * Prend en charge la pagination depuis une requête HTTP.
+ * Add a model the ability to paginate automagically from a request.
  */
 trait Paginable {
 
 	/**
-	 * Exécute les deux requêtes nécessaires à la pagination : le count et la récupération des résultats
-	 * de la page courant.
+	 * Executes the 2 necessary requests : count and all.
 	 *
-	 * @param  Request $request Requête Lithium
-	 * @param  array  $query    Paramètres complémentaires de requêtage
-	 * @return PaginableSet     Set de données pris en charge par le helper de pagination
+	 * @param  Request       $request Lithium http request
+	 * @param  array         $query   Model query
+	 * @return PaginableSet           A paginable documents set
 	 */
 	public static function paginate(Request $request, array $query = []) {
-		$query += ['limit' => 20] ;
+		$query += ['limit' => 20];
 
-		$page = static::_page($request) ;
+		$page = static::_page($request);
 
-		$total = static::count($query) ;
+		$total = static::count($query);
 		$records = static::all([
 			'page' => $page
-		] + $query) ;
+		] + $query);
 
-		$return = new PaginableSet($records) ;
-		$return->meta(['page' => $page, 'total' => $total, 'limit' => $query['limit']]) ;
+		$return = new PaginableSet($records);
+		$return->meta(['page' => $page, 'total' => $total, 'limit' => $query['limit']]);
 
-		return $return ;
+		return $return;
 	}
 
 	/**
-	 * Récupère le numéro de la page courante
+	 * Current page
 	 *
-	 * @param  Request $request Requête Lithium
-	 * @return int              Page courante. 1 par défaut.
+	 * @param  Request $request Lithium request
+	 * @return int              Current page. Default : 1
 	 */
 	protected static function _page(Request $request) {
 		if (isset($request->query['page']) && is_numeric($request->query['page']) && $request->query['page'] > 0) {
-			return $request->query['page'] ;
+			return $request->query['page'];
 		}
 
-		return 1 ;
+		return 1;
 	}
 }
