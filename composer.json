@@ -1,0 +1,17 @@
+{
+	"name": "scharrier/li3_pagination",
+	"version": "0.1.0",
+	"description": "Lithium pagination that doesn't suck",
+	"authors": [
+		{
+			"name": "Sebastien Charrier",
+			"email": "scharrier@gmail.com"
+		}
+	],
+	"keywords" : ["pagination","paginate","lithium","li3"],
+	"licence" : "MIT",
+	"homepage" : "http://github.com/scharrier/li3_pagination/",
+	"require": {
+		"php" : ">=5.4"
+	}
+}
