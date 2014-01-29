@@ -13,7 +13,7 @@ class PaginableSet implements \IteratorAggregate, \Countable {
 	 *
 	 * @var array
 	 */
-	protected $_meta = array() ;
+	protected $_meta = array();
 
 	/**
 	 * Constructor.
@@ -23,10 +23,10 @@ class PaginableSet implements \IteratorAggregate, \Countable {
 	 */
 	public function __construct(DocumentSet $documents = null, array $meta = null) {
 		if (isset($documents)) {
-			$this->_documents = $documents ;
+			$this->_documents = $documents;
 		}
 		if (isset($meta)) {
-			$this->_meta = $meta ;
+			$this->_meta = $meta;
 		}
 	}
 
@@ -37,10 +37,10 @@ class PaginableSet implements \IteratorAggregate, \Countable {
 	 */
 	public function documents(DocumentSet $documents = null) {
 		if (!isset($documents)) {
-			return $this->_documents ;
+			return $this->_documents;
 		}
 
-		$this->_documents = $documents ;
+		$this->_documents = $documents;
 	}
 
 	/**
@@ -51,10 +51,10 @@ class PaginableSet implements \IteratorAggregate, \Countable {
 	 */
 	public function meta($meta = null) {
 		if (!isset($meta)) {
-			return $this->_meta ;
+			return $this->_meta;
 		}
 
-		$this->_meta = $meta + $this->_meta ;
+		$this->_meta = $meta + $this->_meta;
 	}
 
 	/**
@@ -69,7 +69,7 @@ class PaginableSet implements \IteratorAggregate, \Countable {
 	 * @return mixed       Value
 	 */
 	public function __get($key) {
-		return isset($this->_meta[$key]) ? $this->_meta[$key] : null ;
+		return isset($this->_meta[$key]) ? $this->_meta[$key] : null;
 	}
 
 	/**
@@ -78,7 +78,7 @@ class PaginableSet implements \IteratorAggregate, \Countable {
 	 * @return Iterator Documents set
 	 */
 	public function getIterator() {
-		return $this->_documents ;
+		return $this->_documents;
 	}
 
 	/**
@@ -87,6 +87,6 @@ class PaginableSet implements \IteratorAggregate, \Countable {
 	 * @return int Documents count
 	 */
 	public function count() {
-		return $this->_documents->count() ;
+		return $this->_documents->count();
 	}
 }

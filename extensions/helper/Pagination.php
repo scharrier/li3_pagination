@@ -168,7 +168,7 @@ class Pagination extends \lithium\template\Helper {
 		}
 		if ($scope['displayPrevNext']) {
 			$start[] = $this->prev($options);
-			array_unshift($end, $this->next($options)) ;
+			array_unshift($end, $this->next($options));
 		}
 		if ($scope['displayPages']) {
 			$start[] = $this->pages($options) ;
@@ -263,9 +263,9 @@ class Pagination extends \lithium\template\Helper {
 
 		$numbers = $this->_numbers($documents, $scope);
 		if ($numbers) {
-			$content = [] ;
+			$content = [];
 			foreach($numbers as $page) {
-				$content[] = $this->_pageNumber($documents, $page, $scope, $options) ;
+				$content[] = $this->_pageNumber($documents, $page, $scope, $options);
 			}
 			return join($this->_config['linkSeparator'], $content);
 		}
@@ -284,18 +284,18 @@ class Pagination extends \lithium\template\Helper {
 		$pages = ceil($documents->total / $documents->limit);
 
 		if ($pages > 1) {
-			$page = $documents->page ;
-			$numbers = $options['pages'] ;
+			$page = $documents->page;
+			$numbers = $options['pages'];
 
 			if ($page + $numbers < $pages) {
-				$first = max(1, floor($page - ($numbers / 2))) ;
-				$last = min($first + $numbers - 1 , $pages) ;
+				$first = max(1, floor($page - ($numbers / 2)));
+				$last = min($first + $numbers - 1 , $pages);
 			} else {
-				$last = $pages ;
-				$first = max(1, $last - $numbers + 1) ;
+				$last = $pages;
+				$first = max(1, $last - $numbers + 1);
 			}
 
-			return range($first, $last) ;
+			return range($first, $last);
 		}
 		return null ;
 	}
@@ -329,12 +329,12 @@ class Pagination extends \lithium\template\Helper {
 	protected function _documents(PaginableSet $documents = null) {
 		if (!isset($documents)) {
 			if (isset($this->_documents)) {
-				return $this->_documents ;
+				return $this->_documents;
 			}
-			throw new \RuntimeException('No active PaginableSet : cannot generate the pagination') ;
+			throw new \RuntimeException('No active PaginableSet : cannot generate the pagination');
 		}
 
-		return $documents ;
+		return $documents;
 	}
 
 	/**
@@ -347,13 +347,13 @@ class Pagination extends \lithium\template\Helper {
 	 * @return array           Special array with always 3 values
 	 */
 	protected function _split(array $options) {
-		$options += static::$_defaults ;
+		$options += static::$_defaults;
 
 		if (isset($options['documents'])) {
-			$documents = $this->_documents($options['documents']) ;
-			unset($options['documents']) ;
+			$documents = $this->_documents($options['documents']);
+			unset($options['documents']);
 		} else {
-			$documents = $this->_documents() ;
+			$documents = $this->_documents();
 		}
 
 		$return = [
@@ -362,7 +362,7 @@ class Pagination extends \lithium\template\Helper {
 			$documents
 		] ;
 
-		return $return ;
+		return $return;
 	}
 
 	/**
