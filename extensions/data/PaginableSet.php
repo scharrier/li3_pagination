@@ -73,6 +73,17 @@ class PaginableSet implements \IteratorAggregate, \Countable {
 	}
 
 	/**
+	 * Transform into any data type.
+	 *
+	 * @param  string $format  Destination format
+	 * @param  array  $options Options
+	 * @return mixed           Formated data
+	 */
+	public function to($format, array $options = []) {
+		return $this->_documents->to($format, $options);
+	}
+
+	/**
 	 * Implemets IteratorAggregate.
 	 *
 	 * @return Iterator Documents set
