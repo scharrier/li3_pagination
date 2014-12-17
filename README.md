@@ -1,6 +1,8 @@
 li3_pagination
 ==============
 
+> I'm sorry, this li3 package isn't still maintained. If someone wants to take the lead, just ping me.
+
 Lithium doesn't suck. This is a fact. But hey, what's about pagination ? Not natively included in the framework, all the
 existing plugins are just wrong. Pagination is a really common thing : we, developers, have to paginate everything, everytime.
 
